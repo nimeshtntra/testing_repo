@@ -1,1 +1,1 @@
-worker:python3 telegram_travel_bot.py
+worker:python telegram_travel_bot.py
