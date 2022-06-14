@@ -37,7 +37,7 @@ def callback_handler(call):
 @bot.message_handler(commands=['start'])
 def bot_welcome(message):
     bot.reply_to(message, """\
-    Hello, I'm a User and Agency Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline())
+    Hello, I'm a User and Agency Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline(), quote=False)
 
 
 class Agency:
@@ -57,7 +57,7 @@ def agency_welcome(message):
     Hi, I'm Vehicle Agency Bot.
     I will help you to find vehicle for your journey.
     
-    What is the name of your Agency? """)
+    What is the name of your Agency? """, quote=False)
     bot.register_next_step_handler(msg, agency_name_step)
 
 
@@ -79,7 +79,7 @@ def agency_name_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, "A character's Name should be used. Please tell us Whats is your Name ? ")
+            msg = bot.reply_to(message, "A character's Name should be used. Please tell us Whats is your Name ? ",quote=False)
             bot.register_next_step_handler(msg, agency_name_step)
             return
         user = Agency(new_name)
@@ -104,13 +104,13 @@ def agency_number_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'A Mobile Number should be just that: a Number. Please tell us What is your Mobile Number ?')
+            msg = bot.reply_to(message, 'A Mobile Number should be just that: a Number. Please tell us What is your Mobile Number ?', quote=False)
             bot.register_next_step_handler(msg, agency_number_step)
             return
         else:
             pattern = re.compile("(0|91)?[6-9][0-9]{9}")
             if not pattern.match(agency_number):
-                msg = bot.reply_to(message, 'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ')
+                msg = bot.reply_to(message, 'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ', quote=False)
                 bot.register_next_step_handler(msg, agency_number_step)
                 return
             if len(agency_number) != 10:
@@ -133,7 +133,7 @@ def agency_origin_step(message):
         try:
             new_origin = TravelValidation.string_validate(agency_origin)
         except ValueError:
-            msg = bot.reply_to(message, 'Origin Character no more than 10 .Please tell us What is Origin ? ')
+            msg = bot.reply_to(message, 'Origin Character no more than 10 .Please tell us What is Origin ? ',quote=False)
             bot.register_next_step_handler(msg, agency_origin_step)
             return
         except Exception as e:
@@ -144,12 +144,12 @@ def agency_origin_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What is Origin ? ')
+            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What is Origin ? ', quote=False)
             bot.register_next_step_handler(msg, agency_origin_step)
             return
         user = user_dict[chat_id]
         user.agency_origin = new_origin
-        msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ')
+        msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ', quote=False)
         bot.register_next_step_handler(msg, agency_destination_step)
     except Exception as e:
         bot.reply_to(message, 'oooops')
