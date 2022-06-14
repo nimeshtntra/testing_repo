@@ -37,7 +37,7 @@ def callback_handler(call):
 @bot.message_handler(commands=['start'])
 def bot_welcome(message):
     bot.reply_to(message, """\
-    Hello, I'm a User and Agency nnnn Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline())
+    Hello, I'm a User and Agency Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline())
 
 
 class Agency:
