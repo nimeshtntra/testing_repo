@@ -4,7 +4,6 @@ from validation import TravelValidation
 from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData
 import environ
 import logging
-import re
 import datetime
 
 LOG_FORMAT=('{lineno} *** {name} *** {asctime} *** {message}')
@@ -54,7 +53,7 @@ class Agency:
 @bot.message_handler(commands=['agency'])
 def agency_welcome(message):
     msg = bot.reply_to(message, """\
-    Hi, .
+    Hi, I'm Vehicle Agency Bot.
     I will help you to find vehicle for your journey.
     
     What is the name of your Agency? """)
@@ -66,12 +65,8 @@ def agency_name_step(message):
         chat_id = message.chat.id
         agency_name = message.text.capitalize()
         try:
-            new_name = TravelValidation.string_validate(agency_name)
-        except ValueError as e:
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_name_step)
-            return
-        except Exception as e:
+            new_name = TravelValidation.name_validate(agency_name)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="agency_name_step error ",
@@ -96,7 +91,7 @@ def agency_number_step(message):
         agency_number = message.text
         try:
             new_number = TravelValidation.number_validate(agency_number)
-        except Exception as e:
+        except (Exception, ValueError, TypeError) as e:
             logging.error(
                 dict(
                     message="agency_number_step errors",
@@ -104,20 +99,9 @@ def agency_number_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'A Mobile Number should be just that: a Number. Please tell us What is your Mobile Number ?')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_number_step)
             return
-        else:
-            pattern = re.compile("(0|91)?[6-9][0-9]{9}")
-            if not pattern.match(agency_number):
-                msg = bot.reply_to(message, 'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ')
-                bot.register_next_step_handler(msg, agency_number_step)
-                return
-            if len(agency_number) != 10:
-                msg = bot.reply_to(message,
-                                   'The Mobile Number should only be 10 digit only.Please tell us What is your Mobile Number ? ')
-                bot.register_next_step_handler(msg, agency_number_step)
-                return
         user = user_dict[chat_id]
         user.agency_number = new_number
         msg = bot.reply_to(message, 'Agency Vehicle Origin Station ? Enter Origin Name')
@@ -131,12 +115,8 @@ def agency_origin_step(message):
         chat_id = message.chat.id
         agency_origin = message.text.capitalize()
         try:
-            new_origin = TravelValidation.string_validate(agency_origin)
-        except ValueError:
-            msg = bot.reply_to(message, 'Origin Character no more than 10 .Please tell us What is Origin ? ')
-            bot.register_next_step_handler(msg, agency_origin_step)
-            return
-        except Exception as e:
+            new_origin = TravelValidation.origin_validate(agency_origin)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="agency_origin_step error ",
@@ -144,7 +124,7 @@ def agency_origin_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What is Origin ? ')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_origin_step)
             return
         user = user_dict[chat_id]
@@ -160,12 +140,8 @@ def agency_destination_step(message):
         chat_id = message.chat.id
         agency_destination = message.text.capitalize()
         try:
-            new_destination = TravelValidation.string_validate(agency_destination)
-        except ValueError:
-            msg = bot.reply_to(message, 'Destination Character no more than 10 .Please tell us your  Destination name ? ')
-            bot.register_next_step_handler(msg, agency_destination_step)
-            return
-        except Exception as e:
+            new_destination = TravelValidation.destination_validate(agency_destination)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="agency_destination_step error ",
@@ -173,7 +149,7 @@ def agency_destination_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Destination should be a character. Please tell us your  Destination name? ')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_destination_step)
             return
         user = user_dict[chat_id]
@@ -190,8 +166,8 @@ def agency_date_step(message):
         agency_travel_dates = message.text
         try:
             new_date = TravelValidation.date_validate(agency_travel_dates)
-            today_date = datetime.datetime.today().date()
-        except Exception as e:
+            # today_date = datetime.datetime.today().date()
+        except (ValueError, TypeError) as e:
             logging.error(
                 dict(
                     message="agency_date_step error ",
@@ -202,12 +178,13 @@ def agency_date_step(message):
             msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_date_step)
             return
-        if new_date.date() >= today_date:
-            new_date = new_date
-        else:
-            msg = bot.reply_to(message, 'Past Date is not valid. Enter Correct Date')
-            bot.register_next_step_handler(msg, agency_date_step)
-            return
+
+        # if new_date.date() >= today_date:
+        #     new_date = new_date
+        # else:
+        #     msg = bot.reply_to(message, 'Past Date is not valid. Enter Correct Date')
+        #     bot.register_next_step_handler(msg, agency_date_step)
+        #     return
         user = user_dict[chat_id]
         user.agency_travel_dates = new_date.date()
         msg = bot.reply_to(message, 'How Many Passenger Capacity your Vehicle ? Enter Passenger Capacity ?')
@@ -220,8 +197,8 @@ def agency_passenger_step(message):
     chat_id = message.chat.id
     passenger_capacity = message.text
     try:
-        new_passenger = TravelValidation.number_validate(passenger_capacity)
-    except Exception as e:
+        new_passenger = TravelValidation.passenger_validate(passenger_capacity)
+    except (Exception, ValueError) as e:
         logging.error(
             dict(
                 message="agency_passenger_step error ",
@@ -229,14 +206,9 @@ def agency_passenger_step(message):
                 errors=e,
             )
         )
-        msg = bot.reply_to(message, 'Passenger Capacity should be a number. Enter How Many Passenger Capacity ?')
+        msg = bot.reply_to(message, e)
         bot.register_next_step_handler(msg, agency_passenger_step)
         return
-    else:
-        if int(passenger_capacity) > 51:
-            msg = bot.reply_to(message, 'Passenger Capacity no more than 51 .Please Enter How Many Passenger Capacity ?')
-            bot.register_next_step_handler(msg, agency_passenger_step)
-            return
     user = user_dict[chat_id]
     user.passenger_capacity = new_passenger
     bot.send_message(chat_id, 'Nice to meet you ' + user.agency_name +' !!! ' + '\n Number No. : ' + str(user.agency_number) + '\n Your Origin : ' + str(user.agency_origin) + '\n Your Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + '\n Passenger : ' + str(user.passenger_capacity))
@@ -276,12 +248,8 @@ def user_name_step(message):
         chat_id = message.chat.id
         name = message.text.capitalize()
         try:
-            new_name = TravelValidation.string_validate(name)
-        except ValueError:
-            msg = bot.reply_to(message, 'Name Character no more than 8 . Please tell us Whats is your Name ')
-            bot.register_next_step_handler(msg, user_name_step)
-            return
-        except Exception as e:
+            new_name = TravelValidation.name_validate(name)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="user_name_step error ",
@@ -289,7 +257,7 @@ def user_name_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Name should be a character. Please tell us Whats is your Name')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, user_name_step)
             return
         user = User(new_name)
@@ -306,7 +274,7 @@ def user_number_step(message):
         number = message.text
         try:
             new_number = TravelValidation.number_validate(number)
-        except Exception as e:
+        except (Exception, ValueError, TypeError) as e:
             logging.error(
                 dict(
                     message="user_number_step error ",
@@ -314,20 +282,9 @@ def user_number_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, ' Mobile number should be a number. Please tell us Whats is your mobile Number ')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, user_number_step)
             return
-        else:
-            pattern = re.compile("(0|91)?[6-9][0-9]{9}")
-            if len(number) != 10:
-                msg = bot.reply_to(message, 'The Mobile Number should only be 10 digit only.Please tell us What is your Mobile Number ? ')
-                bot.register_next_step_handler(msg, agency_number_step)
-                return
-            if not pattern.match(number):
-                msg = bot.reply_to(message,
-                                   'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ')
-                bot.register_next_step_handler(msg, agency_number_step)
-                return
         user = user_dict[chat_id]
         user.number = new_number
         msg = bot.reply_to(message, 'Whats is your origin ? Enter Origin Name ')
@@ -341,12 +298,8 @@ def user_origin_step(message):
         chat_id = message.chat.id
         origin = message.text.capitalize()
         try:
-            new_origin = TravelValidation.string_validate(origin)
-        except ValueError:
-            msg = bot.reply_to(message, 'Origin Character no more than 10.Please tell us What your Origin Name ?')
-            bot.register_next_step_handler(msg, user_origin_step)
-            return
-        except Exception as e:
+            new_origin = TravelValidation.origin_validate(origin)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="user_origin_step error ",
@@ -354,7 +307,7 @@ def user_origin_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What your Origin Name ?')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, user_origin_step)
             return
         user = user_dict[chat_id]
@@ -370,12 +323,8 @@ def user_destination_step(message):
         chat_id = message.chat.id
         destination = message.text.capitalize()
         try:
-            new_destination = TravelValidation.string_validate(destination)
-        except ValueError:
-            msg = bot.reply_to(message, 'Destination Character no more than 10 .Please tell us What is your destination name ?')
-            bot.register_next_step_handler(msg, user_destination_step)
-            return
-        except Exception as e:
+            new_destination = TravelValidation.destination_validate(destination)
+        except (Exception, ValueError) as e:
             logging.error(
                 dict(
                     message="user_destination_step error ",
@@ -383,7 +332,7 @@ def user_destination_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Destination should be a character. Please tell us What is Your destination name ?')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, user_destination_step)
             return
         user = user_dict[chat_id]
@@ -401,7 +350,7 @@ def user_date_step(message):
         try:
             new_date = TravelValidation.date_validate(dates)
             today_date = datetime.datetime.today().date()
-        except Exception as e:
+        except ValueError as e:
             logging.error(
                 dict(
                     message="user_date_step error ",
@@ -430,8 +379,8 @@ def user_passenger_step(message):
     chat_id = message.chat.id
     passenger = message.text
     try:
-        new_passenger = TravelValidation.number_validate(passenger)
-    except Exception as e:
+        new_passenger = TravelValidation.passenger_validate(passenger)
+    except (Exception, ValueError) as e:
         logging.error(
             dict(
                 message="user_passenger_ste error ",
@@ -439,14 +388,9 @@ def user_passenger_step(message):
                 errors=e,
             )
         )
-        msg = bot.reply_to(message, 'Passenger should be a number. Enter How Many Passenger join this route ?')
+        msg = bot.reply_to(message, e)
         bot.register_next_step_handler(msg, user_passenger_step)
         return
-    else:
-        if int(passenger) > 51:
-            msg = bot.reply_to(message, 'Passenger no more than 51 .Please tell us How Many Passenger join this route')
-            bot.register_next_step_handler(msg, user_passenger_step)
-            return
     user = user_dict[chat_id]
     user.passenger = new_passenger
 
