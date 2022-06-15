@@ -4,11 +4,11 @@ from datetime import datetime
 class TravelValidation:
     def string_validate(name):
         if not name.isalpha():
-            raise Exception
+            raise Exception("A character's Name should be used. Please tell us Whats is your Name ? ")
         if len(name) < 11:
             return name
         else:
-            raise ValueError
+            raise ValueError("No more than 8 characters for a Name . Please tell us what your Name is ?")
 
     def number_validate(number):
         if not number.isdigit():
@@ -22,6 +22,5 @@ class TravelValidation:
         new_date = dates.replace(" ", "-").replace("/", "-").strip()
         data = datetime.strptime(new_date, format)
         if not data:
-            raise Exception
-        if data:
-            return data
+            raise Exception("Incorrect data format, should be Date Enter Date this YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD Format")
+        return data

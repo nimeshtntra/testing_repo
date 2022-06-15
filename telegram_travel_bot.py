@@ -37,7 +37,7 @@ def callback_handler(call):
 @bot.message_handler(commands=['start'])
 def bot_welcome(message):
     bot.reply_to(message, """\
-    Hello, I'm a User and Agency Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline(), quote=False)
+    Hello, I'm a User and Agency Vehicle Bot has select one option for this button !!! """, reply_markup=markup_inline())
 
 
 class Agency:
@@ -54,10 +54,10 @@ class Agency:
 @bot.message_handler(commands=['agency'])
 def agency_welcome(message):
     msg = bot.reply_to(message, """\
-    Hi, I'm Vehicle Agency Bot.
+    Hi, .
     I will help you to find vehicle for your journey.
     
-    What is the name of your Agency? """, quote=False)
+    What is the name of your Agency? """)
     bot.register_next_step_handler(msg, agency_name_step)
 
 
@@ -67,8 +67,8 @@ def agency_name_step(message):
         agency_name = message.text.capitalize()
         try:
             new_name = TravelValidation.string_validate(agency_name)
-        except ValueError:
-            msg = bot.reply_to(message, 'No more than 8 characters for a Name . Please tell us what your Name is ?')
+        except ValueError as e:
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_name_step)
             return
         except Exception as e:
@@ -79,7 +79,7 @@ def agency_name_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, "A character's Name should be used. Please tell us Whats is your Name ? ",quote=False)
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_name_step)
             return
         user = Agency(new_name)
@@ -104,13 +104,13 @@ def agency_number_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'A Mobile Number should be just that: a Number. Please tell us What is your Mobile Number ?', quote=False)
+            msg = bot.reply_to(message, 'A Mobile Number should be just that: a Number. Please tell us What is your Mobile Number ?')
             bot.register_next_step_handler(msg, agency_number_step)
             return
         else:
             pattern = re.compile("(0|91)?[6-9][0-9]{9}")
             if not pattern.match(agency_number):
-                msg = bot.reply_to(message, 'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ', quote=False)
+                msg = bot.reply_to(message, 'This Mobile Number is Not Correct. Please tell us What is your Mobile Number ?  ')
                 bot.register_next_step_handler(msg, agency_number_step)
                 return
             if len(agency_number) != 10:
@@ -133,7 +133,7 @@ def agency_origin_step(message):
         try:
             new_origin = TravelValidation.string_validate(agency_origin)
         except ValueError:
-            msg = bot.reply_to(message, 'Origin Character no more than 10 .Please tell us What is Origin ? ',quote=False)
+            msg = bot.reply_to(message, 'Origin Character no more than 10 .Please tell us What is Origin ? ')
             bot.register_next_step_handler(msg, agency_origin_step)
             return
         except Exception as e:
@@ -144,12 +144,12 @@ def agency_origin_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What is Origin ? ', quote=False)
+            msg = bot.reply_to(message, 'Origin should be a character. Please tell us What is Origin ? ')
             bot.register_next_step_handler(msg, agency_origin_step)
             return
         user = user_dict[chat_id]
         user.agency_origin = new_origin
-        msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ', quote=False)
+        msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ')
         bot.register_next_step_handler(msg, agency_destination_step)
     except Exception as e:
         bot.reply_to(message, 'oooops')
@@ -199,7 +199,7 @@ def agency_date_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Incorrect data format, should be Date Enter Date this YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD Format ')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, agency_date_step)
             return
         if new_date.date() >= today_date:
@@ -409,7 +409,7 @@ def user_date_step(message):
                     errors=e,
                 )
             )
-            msg = bot.reply_to(message, 'Incorrect data format, should be Date Enter Date this YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD Format')
+            msg = bot.reply_to(message, e)
             bot.register_next_step_handler(msg, user_date_step)
             return
         if new_date.date() >= today_date:
