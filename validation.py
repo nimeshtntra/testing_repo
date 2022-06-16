@@ -39,15 +39,15 @@ class TravelValidation:
             format = "%Y-%m-%d"
             new_date = dates.replace(" ", "-").replace("/", "-").strip()
             data = datetime.strptime(new_date, format)
-            today_date = datetime.datetime.today().date()
+            # today_date = datetime.datetime.today().date()
             print('new_date',new_date)
             print('data',data)
-            # if data:
-            #     print('if',data)
-            #     return data
-            if data.date() >= today_date:
-                raise TypeError("Past Date is not valid. Enter Correct Date")
-            return data
+            if data:
+                print('if',data)
+                return data
+            # if data.date() >= today_date:
+            #     raise TypeError("Past Date is not valid. Enter Correct Date")
+            # return data
         except Exception:
             raise ValueError("Incorrect data format, should be Date Enter Date this YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD Format")
 
