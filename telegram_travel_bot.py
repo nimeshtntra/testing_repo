@@ -9,7 +9,7 @@ import datetime
 LOG_FORMAT=('{lineno} *** {name} *** {asctime} *** {message}')
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
 env = environ.Env()
-env.read_env('/home/er/telegram_search/travel_search_bot/.env')
+env.read_env('/home/botree/travel_search_bot/.env')
 TOKEN = env('USER_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 user_dict = {}

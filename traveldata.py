@@ -6,7 +6,7 @@ import requests
 
 env = environ.Env()
 
-env.read_env("/home/er/telegram_search/travel_search_bot/.env")
+env.read_env("/home/botree/travel_search_bot/.env")
 DATA_BASE = env("DATA_BASE")
 TOKEN = env('USER_BOT_TOKEN')
 
