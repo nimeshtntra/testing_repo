@@ -2,6 +2,10 @@ from datetime import datetime
 import re
 
 
+class PastDateError(Exception):
+    pass
+
+
 class TravelValidation:
     def name_validate(name):
         if not name.isalpha():
@@ -34,21 +38,19 @@ class TravelValidation:
             raise ValueError("Destination Character no more than 10 .Please tell us your  Destination name ? ")
         return destination
 
-    def date_validate(dates):
+    def date_validate(user_date):
         try:
             format = "%Y-%m-%d"
-            new_date = dates.replace(" ", "-").replace("/", "-").strip()
-            data = datetime.strptime(new_date, format)
-            # today_date = datetime.datetime.today().date()
-            print('new_date',new_date)
-            print('data',data)
-            if data:
-                print('if',data)
-                return data
-            # if data.date() >= today_date:
-            #     raise TypeError("Past Date is not valid. Enter Correct Date")
-            # return data
-        except Exception:
+            new_date = user_date.replace(" ", "-").replace("/", "-").strip()
+            data = datetime.strptime(new_date, format).date()
+            today_date = datetime.today().date()
+
+            if data <= today_date:
+                raise PastDateError("Past Date is not valid. Enter Correct Date")
+            return data
+        except PastDateError as e:
+            raise ValueError(e)
+        except Exception :
             raise ValueError("Incorrect data format, should be Date Enter Date this YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD Format")
 
     def passenger_validate(passenger):

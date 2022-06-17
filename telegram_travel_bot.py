@@ -4,7 +4,6 @@ from validation import TravelValidation
 from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData
 import environ
 import logging
-import datetime
 
 LOG_FORMAT=('{lineno} *** {name} *** {asctime} *** {message}')
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
@@ -61,136 +60,114 @@ def agency_welcome(message):
 
 
 def agency_name_step(message):
+    chat_id = message.chat.id
+    agency_name = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        agency_name = message.text.capitalize()
-        try:
-            new_name = TravelValidation.name_validate(agency_name)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="agency_name_step error ",
-                    class_name="agency_name_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_name_step)
-            return
+        new_name = TravelValidation.name_validate(agency_name)
         user = Agency(new_name)
         user_dict[chat_id] = user
         msg = bot.reply_to(message, 'What is your Mobile Number? Please enter your Mobile Number')
         bot.register_next_step_handler(msg, agency_number_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="agency_name_step error ",
+                class_name="agency_name_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, agency_name_step)
+        return
 
 
 def agency_number_step(message):
+    chat_id = message.chat.id
+    agency_number = message.text
     try:
-        chat_id = message.chat.id
-        agency_number = message.text
-        try:
-            new_number = TravelValidation.number_validate(agency_number)
-        except (Exception, ValueError, TypeError) as e:
-            logging.error(
-                dict(
-                    message="agency_number_step errors",
-                    class_name="agency_number_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_number_step)
-            return
+        new_number = TravelValidation.number_validate(agency_number)
         user = user_dict[chat_id]
         user.agency_number = new_number
         msg = bot.reply_to(message, 'Agency Vehicle Origin Station ? Enter Origin Name')
         bot.register_next_step_handler(msg, agency_origin_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError, TypeError) as e:
+        logging.error(
+            dict(
+                message="agency_number_step errors",
+                class_name="agency_number_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, agency_number_step)
+        return
 
 
 def agency_origin_step(message):
+    chat_id = message.chat.id
+    agency_origin = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        agency_origin = message.text.capitalize()
-        try:
-            new_origin = TravelValidation.origin_validate(agency_origin)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="agency_origin_step error ",
-                    class_name="agency_origin_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_origin_step)
-            return
+        new_origin = TravelValidation.origin_validate(agency_origin)
         user = user_dict[chat_id]
         user.agency_origin = new_origin
         msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ')
         bot.register_next_step_handler(msg, agency_destination_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="agency_origin_step error ",
+                class_name="agency_origin_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, agency_origin_step)
+        return
 
 
 def agency_destination_step(message):
+    chat_id = message.chat.id
+    agency_destination = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        agency_destination = message.text.capitalize()
-        try:
-            new_destination = TravelValidation.destination_validate(agency_destination)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="agency_destination_step error ",
-                    class_name="agency_destination_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_destination_step)
-            return
+        new_destination = TravelValidation.destination_validate(agency_destination)
         user = user_dict[chat_id]
         user.agency_destination = new_destination
         msg = bot.reply_to(message, 'When Do you want to go Agency Vehicle ? say dates like : YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD any one Format ')
         bot.register_next_step_handler(msg, agency_date_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="agency_destination_step error ",
+                class_name="agency_destination_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, agency_destination_step)
+        return
 
 
 def agency_date_step(message):
+    chat_id = message.chat.id
+    agency_travel_dates = message.text
     try:
-        chat_id = message.chat.id
-        agency_travel_dates = message.text
-        try:
-            new_date = TravelValidation.date_validate(agency_travel_dates)
-            # today_date = datetime.datetime.today().date()
-        except (ValueError, TypeError) as e:
-            logging.error(
-                dict(
-                    message="agency_date_step error ",
-                    class_name="agency_date_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, agency_date_step)
-            return
-
-        # if new_date.date() >= today_date:
-        #     new_date = new_date
-        # else:
-        #     msg = bot.reply_to(message, 'Past Date is not valid. Enter Correct Date')
-        #     bot.register_next_step_handler(msg, agency_date_step)
-        #     return
+        new_date = TravelValidation.date_validate(agency_travel_dates)
         user = user_dict[chat_id]
-        user.agency_travel_dates = new_date.date()
+        user.agency_travel_dates = new_date
         msg = bot.reply_to(message, 'How Many Passenger Capacity your Vehicle ? Enter Passenger Capacity ?')
         bot.register_next_step_handler(msg, agency_passenger_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (ValueError, TypeError) as e:
+        logging.error(
+            dict(
+                message="agency_date_step error ",
+                class_name="agency_date_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, agency_date_step)
+        return
 
 
 def agency_passenger_step(message):
@@ -198,6 +175,16 @@ def agency_passenger_step(message):
     passenger_capacity = message.text
     try:
         new_passenger = TravelValidation.passenger_validate(passenger_capacity)
+        user = user_dict[chat_id]
+        user.passenger_capacity = new_passenger
+        bot.send_message(chat_id, 'Nice to meet you ' + user.agency_name + ' !!! ' + '\n Number No. : ' + str(user.agency_number) + '\n Your Origin : ' + str(user.agency_origin) + '\n Your Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + '\n Passenger : ' + str(user.passenger_capacity))
+        DistributorInsertDb().distributor_data(user.agency_name, user.agency_number, user.agency_origin,user.agency_destination, user.agency_travel_dates,user.passenger_capacity, chat_id)
+        result = UserFilterData().user_filter(user.agency_origin, user.agency_destination, user.agency_travel_dates)
+        if result:
+            for messages in result:
+                result_chat_id = messages.user_chat_id
+                seat = '\n Origin : ' + str(user.agency_origin) + '\n Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + ' \n This route vehicle is available right now, so call Agency this Mobile Number  ' + str(user.agency_number) + ' immediately !!! '
+                UserPrivetMessage().send_msg(seat, result_chat_id)
     except (Exception, ValueError) as e:
         logging.error(
             dict(
@@ -209,16 +196,6 @@ def agency_passenger_step(message):
         msg = bot.reply_to(message, e)
         bot.register_next_step_handler(msg, agency_passenger_step)
         return
-    user = user_dict[chat_id]
-    user.passenger_capacity = new_passenger
-    bot.send_message(chat_id, 'Nice to meet you ' + user.agency_name +' !!! ' + '\n Number No. : ' + str(user.agency_number) + '\n Your Origin : ' + str(user.agency_origin) + '\n Your Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + '\n Passenger : ' + str(user.passenger_capacity))
-    DistributorInsertDb().distributor_data(user.agency_name, user.agency_number, user.agency_origin, user.agency_destination, user.agency_travel_dates, user.passenger_capacity, chat_id)
-    result = UserFilterData().user_filter(user.agency_origin, user.agency_destination, user.agency_travel_dates)
-    if result:
-        for messages in result:
-            result_chat_id = messages.user_chat_id
-            seat = '\n Origin : ' + str(user.agency_origin) + '\n Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates)+' \n This route vehicle is available right now, so call Agency this Mobile Number  ' + str(user.agency_number) + ' immediately !!! '
-            UserPrivetMessage().send_msg(seat, result_chat_id)
 
 user_dict = {}
 
@@ -244,135 +221,112 @@ def user_welcome(message):
 
 
 def user_name_step(message):
+    chat_id = message.chat.id
+    name = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        name = message.text.capitalize()
-        try:
-            new_name = TravelValidation.name_validate(name)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="user_name_step error ",
-                    class_name="user_name_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, user_name_step)
-            return
+        new_name = TravelValidation.name_validate(name)
         user = User(new_name)
         user_dict[chat_id] = user
         msg = bot.reply_to(message, 'Whats is your mobile Number ? Enter Mobile Number')
         bot.register_next_step_handler(msg, user_number_step)
-    except Exception as e:
-        bot.reply_to(e, 'oooops')
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="user_name_step error ",
+                class_name="user_name_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, user_name_step)
+        return
 
 
 def user_number_step(message):
+    chat_id = message.chat.id
+    number = message.text
     try:
-        chat_id = message.chat.id
-        number = message.text
-        try:
-            new_number = TravelValidation.number_validate(number)
-        except (Exception, ValueError, TypeError) as e:
-            logging.error(
-                dict(
-                    message="user_number_step error ",
-                    class_name="user_number_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, user_number_step)
-            return
+        new_number = TravelValidation.number_validate(number)
         user = user_dict[chat_id]
         user.number = new_number
         msg = bot.reply_to(message, 'Whats is your origin ? Enter Origin Name ')
         bot.register_next_step_handler(msg, user_origin_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError, TypeError) as e:
+        logging.error(
+            dict(
+                message="user_number_step error ",
+                class_name="user_number_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, user_number_step)
+        return
 
 
 def user_origin_step(message):
+    chat_id = message.chat.id
+    origin = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        origin = message.text.capitalize()
-        try:
-            new_origin = TravelValidation.origin_validate(origin)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="user_origin_step error ",
-                    class_name="user_origin_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, user_origin_step)
-            return
+        new_origin = TravelValidation.origin_validate(origin)
         user = user_dict[chat_id]
         user.origin = new_origin
         msg = bot.reply_to(message, 'Where are you going From ? Enter Destination Name')
         bot.register_next_step_handler(msg, user_destination_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="user_origin_step error ",
+                class_name="user_origin_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, user_origin_step)
+        return
 
 
 def user_destination_step(message):
+    chat_id = message.chat.id
+    destination = message.text.capitalize()
     try:
-        chat_id = message.chat.id
-        destination = message.text.capitalize()
-        try:
-            new_destination = TravelValidation.destination_validate(destination)
-        except (Exception, ValueError) as e:
-            logging.error(
-                dict(
-                    message="user_destination_step error ",
-                    class_name="user_destination_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, user_destination_step)
-            return
+        new_destination = TravelValidation.destination_validate(destination)
         user = user_dict[chat_id]
         user.destination = new_destination
         msg = bot.reply_to(message, 'When Do you want to go your destination ? say dates like : YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD any one Format')
         bot.register_next_step_handler(msg, user_date_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except (Exception, ValueError) as e:
+        logging.error(
+            dict(
+                message="user_destination_step error ",
+                class_name="user_destination_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, user_destination_step)
+        return
 
 
 def user_date_step(message):
+    chat_id = message.chat.id
+    dates = message.text
     try:
-        chat_id = message.chat.id
-        dates = message.text
-        try:
-            new_date = TravelValidation.date_validate(dates)
-            today_date = datetime.datetime.today().date()
-        except ValueError as e:
-            logging.error(
-                dict(
-                    message="user_date_step error ",
-                    class_name="user_date_step",
-                    errors=e,
-                )
-            )
-            msg = bot.reply_to(message, e)
-            bot.register_next_step_handler(msg, user_date_step)
-            return
-        if new_date.date() >= today_date:
-            new_date = new_date
-        else:
-            msg = bot.reply_to(message, 'Past Date is not valid. Enter Correct Date')
-            bot.register_next_step_handler(msg, user_date_step)
-            return
+        new_date = TravelValidation.date_validate(dates)
         user = user_dict[chat_id]
-        user.dates = new_date.date()
+        user.dates = new_date
         msg = bot.reply_to(message, 'How Many Passenger join this route ? Enter Passenger Number')
         bot.register_next_step_handler(msg, user_passenger_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
+    except ValueError as e:
+        logging.error(
+            dict(message="user_date_step error ",
+                 class_name="user_date_step",
+                 errors=e,
+                 )
+            )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, user_date_step)
+        return
 
 
 def user_passenger_step(message):
@@ -380,6 +334,17 @@ def user_passenger_step(message):
     passenger = message.text
     try:
         new_passenger = TravelValidation.passenger_validate(passenger)
+        user = user_dict[chat_id]
+        user.passenger = new_passenger
+        bot.send_message(chat_id, 'Nice to meet you ' + user.name + ' !!! ' + '\n Number No. : ' + str(user.number) + '\n Your Origin : ' + str(user.origin) + '\n Your Destination : ' + str(user.destination) + '\n Date : ' + str(user.dates) + '\n Passenger : ' + str(user.passenger))
+
+        UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger,chat_id)
+
+        result = DistributorFilterData().distributor_filter(user.origin, user.destination, user.dates)
+        if result:
+            bot.send_message(chat_id, ' Thanks for your quick response, ' + user.name + ' !!! Your Vehicle Ticket has been booked. ')
+        else:
+            bot.send_message(chat_id, ' Thank you ' + user.name + ' If There any update I will inform you !!!  ')
     except (Exception, ValueError) as e:
         logging.error(
             dict(
@@ -391,18 +356,6 @@ def user_passenger_step(message):
         msg = bot.reply_to(message, e)
         bot.register_next_step_handler(msg, user_passenger_step)
         return
-    user = user_dict[chat_id]
-    user.passenger = new_passenger
-
-    bot.send_message(chat_id, 'Nice to meet you ' + user.name +' !!! ' + '\n Number No. : ' + str(user.number) + '\n Your Origin : ' + str(user.origin) + '\n Your Destination : ' + str(user.destination) + '\n Date : ' + str(user.dates) + '\n Passenger : ' + str(user.passenger))
-
-    UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger, chat_id)
-
-    result = DistributorFilterData().distributor_filter(user.origin, user.destination, user.dates)
-    if result:
-        bot.send_message(chat_id, ' Thanks for your quick response, '+ user.name +  ' !!! Your Vehicle Ticket has been booked. ')
-    else:
-        bot.send_message(chat_id, ' Thank you ' + user.name + ' If There any update I will inform you !!!  ')
 
 
 bot.enable_save_next_step_handlers()
