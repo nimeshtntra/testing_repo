@@ -2,14 +2,10 @@ import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from validation import TravelValidation
 from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData
-import environ
 import logging
+from constants import *
 
-LOG_FORMAT=('{lineno} *** {name} *** {asctime} *** {message}')
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
-env = environ.Env()
-env.read_env('/home/botree/travel_search_bot/.env')
-TOKEN = env('USER_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 user_dict = {}
 
@@ -68,7 +64,7 @@ def agency_name_step(message):
         user_dict[chat_id] = user
         msg = bot.reply_to(message, 'What is your Mobile Number? Please enter your Mobile Number')
         bot.register_next_step_handler(msg, agency_number_step)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_name_step error ",
@@ -90,7 +86,7 @@ def agency_number_step(message):
         user.agency_number = new_number
         msg = bot.reply_to(message, 'Agency Vehicle Origin Station ? Enter Origin Name')
         bot.register_next_step_handler(msg, agency_origin_step)
-    except (Exception, ValueError, TypeError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_number_step errors",
@@ -113,7 +109,7 @@ def agency_origin_step(message):
         msg = bot.reply_to(message, 'Agency Vehicle Destination ? Enter Destination Name ? ')
         bot.register_next_step_handler(msg, agency_destination_step)
 
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_origin_step error ",
@@ -135,7 +131,7 @@ def agency_destination_step(message):
         user.agency_destination = new_destination
         msg = bot.reply_to(message, 'When Do you want to go Agency Vehicle ? say dates like : YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD any one Format ')
         bot.register_next_step_handler(msg, agency_date_step)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_destination_step error ",
@@ -157,7 +153,7 @@ def agency_date_step(message):
         user.agency_travel_dates = new_date
         msg = bot.reply_to(message, 'How Many Passenger Capacity your Vehicle ? Enter Passenger Capacity ?')
         bot.register_next_step_handler(msg, agency_passenger_step)
-    except (ValueError, TypeError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_date_step error ",
@@ -185,7 +181,7 @@ def agency_passenger_step(message):
                 result_chat_id = messages.user_chat_id
                 seat = '\n Origin : ' + str(user.agency_origin) + '\n Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + ' \n This route vehicle is available right now, so call Agency this Mobile Number  ' + str(user.agency_number) + ' immediately !!! '
                 UserPrivetMessage().send_msg(seat, result_chat_id)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="agency_passenger_step error ",
@@ -229,7 +225,7 @@ def user_name_step(message):
         user_dict[chat_id] = user
         msg = bot.reply_to(message, 'Whats is your mobile Number ? Enter Mobile Number')
         bot.register_next_step_handler(msg, user_number_step)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="user_name_step error ",
@@ -251,7 +247,7 @@ def user_number_step(message):
         user.number = new_number
         msg = bot.reply_to(message, 'Whats is your origin ? Enter Origin Name ')
         bot.register_next_step_handler(msg, user_origin_step)
-    except (Exception, ValueError, TypeError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="user_number_step error ",
@@ -273,7 +269,7 @@ def user_origin_step(message):
         user.origin = new_origin
         msg = bot.reply_to(message, 'Where are you going From ? Enter Destination Name')
         bot.register_next_step_handler(msg, user_destination_step)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="user_origin_step error ",
@@ -295,7 +291,7 @@ def user_destination_step(message):
         user.destination = new_destination
         msg = bot.reply_to(message, 'When Do you want to go your destination ? say dates like : YYYY-MM-DD or YYYY/MM/DD or YYYY MM DD any one Format')
         bot.register_next_step_handler(msg, user_date_step)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="user_destination_step error ",
@@ -345,7 +341,7 @@ def user_passenger_step(message):
             bot.send_message(chat_id, ' Thanks for your quick response, ' + user.name + ' !!! Your Vehicle Ticket has been booked. ')
         else:
             bot.send_message(chat_id, ' Thank you ' + user.name + ' If There any update I will inform you !!!  ')
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         logging.error(
             dict(
                 message="user_passenger_ste error ",

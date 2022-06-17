@@ -1,14 +1,8 @@
-from sqlalchemy import create_engine, Column ,String, Integer, Date, insert, BIGINT
+from sqlalchemy import create_engine, Column, String, Integer, Date, insert, BIGINT
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import environ
 import requests
-
-env = environ.Env()
-
-env.read_env("/home/botree/travel_search_bot/.env")
-DATA_BASE = env("DATA_BASE")
-TOKEN = env('USER_BOT_TOKEN')
+from constants import *
 
 engine = create_engine(DATA_BASE, echo=True)
 Session = sessionmaker(bind=engine)
