@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import requests
 from constants import *
 
-engine = create_engine(DATABASE, echo=True)
+engine = create_engine(DATA_BASE, echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 
