@@ -45,7 +45,7 @@ class TravelValidation:
             data = datetime.strptime(new_date, format).date()
             today_date = datetime.today().date()
 
-            if data <= today_date:
+            if data < today_date:
                 raise PastDateError("Past Date is not valid. Enter Correct Date")
             return data
         except PastDateError as e:
