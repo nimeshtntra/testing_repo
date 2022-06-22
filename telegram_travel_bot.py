@@ -217,7 +217,7 @@ class User:
 @bot.message_handler(commands=['user'])
 def user_welcome(message):
     msg = bot.reply_to(message, """\
-    Hi, I'm Vehicle User Bot.
+    Hi,  I'm Vehicle User Bot.
     I will help you to find vehicle for your journey.
     
     What is your name? """)
