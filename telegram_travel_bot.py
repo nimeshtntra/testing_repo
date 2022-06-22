@@ -344,7 +344,6 @@ def user_passenger_step(message):
 
         UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger,chat_id)
 
-
         result = DistributorFilterData().distributor_filter(user.origin, user.destination, user.dates)
         if result:
             bot.send_message(chat_id, ' Thanks for your quick response, ' + user.name + ' !!! Your Vehicle Ticket has been booked. ')
