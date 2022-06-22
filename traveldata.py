@@ -59,18 +59,23 @@ class DistributorInsertDb:
 
 class DistributorFilterData:
     def distributor_filter(self, origin, destination, dates):
-        result = session.query(BusDistributor).filter(BusDistributor.distributor_origin==origin, BusDistributor.distributor_destination==destination, BusDistributor.distributor_travel_dates==dates).first()
+        result = session.query(BusDistributor).filter(BusDistributor.distributor_origin==origin, BusDistributor.distributor_destination==destination, BusDistributor.distributor_travel_dates==dates)
         return result
 
 
 class UserFilterData:
-
     def user_filter(self, origin, destination, dates):
         result = session.query(Bus_Travel).filter(Bus_Travel.origin == origin, Bus_Travel.destination == destination, Bus_Travel.date == dates)
         return result
 
 
 class UserPrivetMessage:
+    def send_msg(self, seat, chat_id):
+        url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
+        requests.get(url_req)
+
+
+class AgencyPrivetMessage:
     def send_msg(self, seat, chat_id):
         url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
         requests.get(url_req)

@@ -1,7 +1,7 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from validation import TravelValidation
-from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData
+from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData, AgencyPrivetMessage
 import logging
 from constants import *
 
@@ -176,11 +176,19 @@ def agency_passenger_step(message):
         bot.send_message(chat_id, 'Nice to meet you ' + user.agency_name + ' !!! ' + '\n Number No. : ' + str(user.agency_number) + '\n Your Origin : ' + str(user.agency_origin) + '\n Your Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + '\n Passenger : ' + str(user.passenger_capacity))
         DistributorInsertDb().distributor_data(user.agency_name, user.agency_number, user.agency_origin,user.agency_destination, user.agency_travel_dates,user.passenger_capacity, chat_id)
         result = UserFilterData().user_filter(user.agency_origin, user.agency_destination, user.agency_travel_dates)
+        results = DistributorFilterData().distributor_filter(user.agency_origin, user.agency_destination, user.agency_travel_dates)
+        user_count = result.count()
         if result:
             for messages in result:
                 result_chat_id = messages.user_chat_id
                 seat = '\n Origin : ' + str(user.agency_origin) + '\n Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + ' \n This route vehicle is available right now, so call Agency this Mobile Number  ' + str(user.agency_number) + ' immediately !!! '
                 UserPrivetMessage().send_msg(seat, result_chat_id)
+        if results:
+            for messages in results:
+                result_chat_id = messages.distributor_chat_id
+                seat = (f"{user_count} user is available this route ")
+                AgencyPrivetMessage().send_msg(seat, result_chat_id)
+
     except ValueError as e:
         logging.error(
             dict(
@@ -335,6 +343,7 @@ def user_passenger_step(message):
         bot.send_message(chat_id, 'Nice to meet you ' + user.name + ' !!! ' + '\n Number No. : ' + str(user.number) + '\n Your Origin : ' + str(user.origin) + '\n Your Destination : ' + str(user.destination) + '\n Date : ' + str(user.dates) + '\n Passenger : ' + str(user.passenger))
 
         UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger,chat_id)
+
 
         result = DistributorFilterData().distributor_filter(user.origin, user.destination, user.dates)
         if result:
