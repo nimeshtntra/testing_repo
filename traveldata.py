@@ -32,3 +32,9 @@ class UserPrivetMessage:
     def send_msg(self, seat, chat_id):
         url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
         requests.get(url_req)
+
+
+class AgencyPrivetMessage:
+    def send_msg(self, seat, chat_id):
+        url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
+        requests.get(url_req)
