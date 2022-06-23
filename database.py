@@ -41,23 +41,3 @@ class BusDistributor(Base):
 
 Base.metadata.create_all(engine)
 
-
-class Token(Base):
-    __tablename__ = 'agency_token'
-
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    status = Column(Boolean)
-
-Base.metadata.create_all(engine)
-
-
-class Subscription(Base):
-    __tablename__ = 'agency_subscription'
-
-    id = Column(Integer, primary_key=True)
-    agency_id = Column(Integer, ForeignKey("bus_distributor.id"))
-    date = Column(DateTime)
-    status = Column(Integer)
-
-Base.metadata.create_all(engine)
