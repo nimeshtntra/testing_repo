@@ -1,46 +1,5 @@
-from sqlalchemy import create_engine, Column, String, Integer, Date, insert, BIGINT
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from database import *
 import requests
-from constants import *
-
-engine = create_engine(DATA_BASE, echo=True)
-Session = sessionmaker(bind=engine)
-session = Session()
-
-Base = declarative_base()
-
-
-class Bus_Travel(Base):
-    __tablename__ = 'bus_travel'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50))
-    number = Column(BIGINT)
-    origin = Column(String(50))
-    destination = Column(String(50))
-    date = Column(Date())
-    passenger = Column(Integer)
-    user_chat_id = Column(Integer)
-
-
-Base.metadata.create_all(engine)
-
-
-class BusDistributor(Base):
-    __tablename__ = 'bus_distributor'
-
-    id = Column(Integer, primary_key=True)
-    distributor_name = Column(String(50))
-    distributor_number = Column(BIGINT)
-    distributor_origin = Column(String(50))
-    distributor_destination = Column(String(50))
-    distributor_travel_dates = Column(Date())
-    passenger_capacity = Column(Integer)
-    distributor_chat_id = Column(Integer)
-
-
-Base.metadata.create_all(engine)
 
 
 class UserInsertDb:
@@ -70,12 +29,6 @@ class UserFilterData:
 
 
 class UserPrivetMessage:
-    def send_msg(self, seat, chat_id):
-        url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
-        requests.get(url_req)
-
-
-class AgencyPrivetMessage:
     def send_msg(self, seat, chat_id):
         url_req = "https://api.telegram.org/bot" + str(TOKEN) + "/sendMessage" + "?chat_id=" + str(chat_id) + "&text=" + seat
         requests.get(url_req)
