@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Column, String, Integer, Date, insert, BIGINT, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, String, Integer, Date, insert, BIGINT, DateTime, ForeignKey, types
+from sqlalchemy_utils import ChoiceType, Timestamp
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from constants import *
@@ -37,6 +38,31 @@ class BusDistributor(Base):
     distributor_travel_dates = Column(Date())
     passenger_capacity = Column(Integer)
     distributor_chat_id = Column(Integer)
+
+
+Base.metadata.create_all(engine)
+
+
+class Token(Base, Timestamp):
+    __tablename__ = 'agency_token'
+
+    id = Column(Integer, primary_key=True)
+    token = Column(String(10))
+    status = Column(ChoiceType(TOKEN_STATUS), default='is_active')
+
+
+Base.metadata.create_all(engine)
+
+
+class Subscription(Base, Timestamp):
+    __tablename__ = 'agency_subscription'
+
+    id = Column(Integer, primary_key=True)
+    agency_id = Column(Integer, ForeignKey("bus_distributor.id"))
+    token = Column(Integer, ForeignKey("agency_token.id"))
+    start_date = Column(Date())
+    end_date = Column(Date())
+    status = Column(ChoiceType(TOKEN_STATUS), default='is_active')
 
 
 Base.metadata.create_all(engine)

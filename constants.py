@@ -6,4 +6,7 @@ env.read_env('/home/botree/travel_search_bot/.env')
 TOKEN = env('LOCAL_TOKEN')
 DATA_BASE = env("DATA_BASE")
 
-
+TOKEN_STATUS = [
+       ('is_active', 'is_active'),
+       ('expire', 'expire')
+    ]
