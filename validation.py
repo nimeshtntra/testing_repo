@@ -57,5 +57,5 @@ class TravelValidation:
         if not passenger.isdigit():
             raise ValueError("Passenger Capacity should be a number. Enter How Many Passenger Capacity ?")
         if int(passenger) > 51:
-            raise ValueError("Passenger Capacity no more than 51 .Please Enter How Many Passenger Capacity ? ")
+            raise ValueError("Passenger Capacity should not more than 51. Please Enter passenger Capacity.")
         return passenger
