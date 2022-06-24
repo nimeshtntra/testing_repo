@@ -194,7 +194,7 @@ def agency_passenger_step(message):
                     seat = (f"{user_count} user is available this route ")
                     AgencyPrivetMessage().send_msg(seat, result_chat_id)
         else:
-            bot.send_message(chat_id, ' your subscription is not please subscription and then show user data')
+            bot.send_message(chat_id, 'We cannot find any subscription for you. Please contact Admin(+91XXXXXXXXXX) for a purchase subscription.')
 
     except ValueError as e:
         logging.error(
@@ -378,7 +378,7 @@ def agency_subscription_valid(message):
         if results:
             bot.send_message(chat_id, ' Your Subscription  valid till ' + str(results.start_date.date()) + ' To ' + str(results.end_date.date()))
         else:
-            msg = bot.reply_to(message, "Please Enter Admin Token")
+            msg = bot.reply_to(message, "Please Enter the Token which purchased from admin")
             bot.register_next_step_handler(msg, agency_subscription_process)
     except ValueError as e:
         logging.error(
@@ -403,7 +403,7 @@ def agency_subscription_process(message):
             SubscriptionInsertDb().subscription_data(token, chat_id)
             bot.send_message(chat_id, 'successful subscription is complete ')
         else:
-            bot.send_message(chat_id, 'Token is not valid please contact admin')
+            bot.send_message(chat_id, 'Token is not valid please Try again with another subscription token')
 
     except ValueError as e:
         logging.error(
