@@ -3,6 +3,8 @@ from sqlalchemy_utils import ChoiceType, Timestamp
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from constants import *
+import datetime
+from dateutil.relativedelta import relativedelta
 
 engine = create_engine(DATA_BASE, echo=True)
 Session = sessionmaker(bind=engine)
@@ -44,25 +46,34 @@ Base.metadata.create_all(engine)
 
 
 class Token(Base, Timestamp):
-    __tablename__ = 'agency_token'
+    __tablename__ = 'admin_token'
 
     id = Column(Integer, primary_key=True)
-    token = Column(String(10))
-    status = Column(ChoiceType(TOKEN_STATUS), default='is_active')
+    number_of_months = Column(Integer)
+    token = Column(String(30))
+    status = Column(ChoiceType(TOKEN_STATUS), default='Active')
 
 
 Base.metadata.create_all(engine)
+
+
+def after_month(context):
+    start_date = context.get_current_parameters()['start_date']
+    token = context.get_current_parameters()['token']
+    token_obj = session.query(Token).filter(Token.id == token).first()
+    end_date = start_date + relativedelta(months=+token_obj.number_of_months)
+    return end_date
 
 
 class Subscription(Base, Timestamp):
     __tablename__ = 'agency_subscription'
 
     id = Column(Integer, primary_key=True)
-    agency_id = Column(Integer, ForeignKey("bus_distributor.id"))
-    token = Column(Integer, ForeignKey("agency_token.id"))
-    start_date = Column(Date())
-    end_date = Column(Date())
-    status = Column(ChoiceType(TOKEN_STATUS), default='is_active')
+    token = Column(Integer, ForeignKey('admin_token.id'))
+    agency_chat_id = Column(Integer)
+    start_date = Column(DateTime, default=datetime.datetime.utcnow)
+    end_date = Column(DateTime, default=after_month)
+    status = Column(ChoiceType(TOKEN_STATUS), default='Active')
 
 
 Base.metadata.create_all(engine)

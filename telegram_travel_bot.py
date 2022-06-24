@@ -1,9 +1,12 @@
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from validation import TravelValidation
-from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData, AgencyPrivetMessage
+from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData, AgencyPrivetMessage, SubscriptionInsertDb, TokenManagement
 import logging
 from constants import *
+
+
 
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
 bot = telebot.TeleBot(TOKEN)
@@ -121,6 +124,23 @@ def agency_origin_step(message):
         bot.register_next_step_handler(msg, agency_origin_step)
         return
 
+
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+def cal(c):
+    print(">>>>>>>")
+
+    result, key, step = DetailedTelegramCalendar().process(c.data)
+    if not result and key:
+        bot.edit_message_text(f"Select {LSTEP[step]}",
+                              c.message.chat.id,
+                              c.message.message_id,
+                              reply_markup=key)
+    elif result:
+        bot.edit_message_text(f"You selected {result}",
+                              c.message.chat.id,
+                              c.message.message_id)
+        msg = bot.reply_to(c, 'How Many Passenger Capacity your Vehicle ? Enter Passenger Capacity ?')
+        bot.register_next_step_handler(msg, agency_date_step)
 
 def agency_destination_step(message):
     chat_id = message.chat.id
@@ -342,8 +362,7 @@ def user_passenger_step(message):
         user.passenger = new_passenger
         bot.send_message(chat_id, 'Nice to meet you ' + user.name + ' !!! ' + '\n Number No. : ' + str(user.number) + '\n Your Origin : ' + str(user.origin) + '\n Your Destination : ' + str(user.destination) + '\n Date : ' + str(user.dates) + '\n Passenger : ' + str(user.passenger))
 
-        UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger,chat_id)
-
+        UserInsertDb().travel_data(user.name, user.number, user.origin, user.destination, user.dates, user.passenger, chat_id)
         result = DistributorFilterData().distributor_filter(user.origin, user.destination, user.dates)
         if result:
             bot.send_message(chat_id, ' Thanks for your quick response, ' + user.name + ' !!! Your Vehicle Ticket has been booked. ')
@@ -359,6 +378,56 @@ def user_passenger_step(message):
         )
         msg = bot.reply_to(message, e)
         bot.register_next_step_handler(msg, user_passenger_step)
+        return
+
+
+user_dict = {}
+
+@bot.message_handler(commands=['subscription'])
+def subscription(message):
+    chat_id = message.chat.id
+    try:
+        results = TokenManagement().token_expire(chat_id)
+        if results:
+            bot.send_message(chat_id, ' Your Subscription  valid till ' + str(results.start_date.date()) + ' To ' + str(results.end_date.date()))
+        else:
+            msg = bot.reply_to(message, "Please Enter Admin Token")
+            bot.register_next_step_handler(msg, insert)
+    except ValueError as e:
+        logging.error(
+            dict(
+                message="token_step error ",
+                class_name="token_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, subscription)
+        return
+
+
+def insert(message):
+    chat_id = message.chat.id
+    token = message.text
+    try:
+        token = token
+        result = TokenManagement().token_filter(token)
+        if result:
+            SubscriptionInsertDb().subscription_data(token, chat_id)
+            bot.send_message(chat_id, 'successful subscription is complete ')
+        else:
+            bot.send_message(chat_id, 'Token is not valid please contact admin')
+
+    except ValueError as e:
+        logging.error(
+            dict(
+                message="token_step error ",
+                class_name="token_step",
+                errors=e,
+            )
+        )
+        msg = bot.reply_to(message, e)
+        bot.register_next_step_handler(msg, insert)
         return
 
 

@@ -7,6 +7,6 @@ TOKEN = env('LOCAL_TOKEN')
 DATA_BASE = env("DATA_BASE")
 
 TOKEN_STATUS = [
-       ('is_active', 'is_active'),
-       ('expire', 'expire')
+       ('Active', 'Active'),
+       ('Expire', 'Expire')
     ]

@@ -16,6 +16,26 @@ class DistributorInsertDb:
         session.commit()
 
 
+class SubscriptionInsertDb:
+    def subscription_data(self, token, chat_id):
+        token_obj = session.query(Token).filter(Token.token == token).first()
+        data = Subscription(token=token_obj.id,  agency_chat_id=chat_id)
+        session.add(data)
+        session.commit()
+        token_obj.status = "Expire"
+        session.commit()
+
+
+class TokenManagement:
+    def token_filter(self, token):
+        result = session.query(Token).filter(Token.token == token, Token.status == "Active").first()
+        return result
+
+    def token_expire(self,chat_id):
+        results = session.query(Subscription).filter(Subscription.agency_chat_id == chat_id, Subscription.status == 'Active').first()
+        return results
+
+
 class DistributorFilterData:
     def distributor_filter(self, origin, destination, dates):
         result = session.query(BusDistributor).filter(BusDistributor.distributor_origin==origin, BusDistributor.distributor_destination==destination, BusDistributor.distributor_travel_dates==dates)
