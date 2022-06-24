@@ -1,4 +1,3 @@
-from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from validation import TravelValidation
@@ -125,23 +124,6 @@ def agency_origin_step(message):
         return
 
 
-@bot.callback_query_handler(func=DetailedTelegramCalendar.func())
-def cal(c):
-    print(">>>>>>>")
-
-    result, key, step = DetailedTelegramCalendar().process(c.data)
-    if not result and key:
-        bot.edit_message_text(f"Select {LSTEP[step]}",
-                              c.message.chat.id,
-                              c.message.message_id,
-                              reply_markup=key)
-    elif result:
-        bot.edit_message_text(f"You selected {result}",
-                              c.message.chat.id,
-                              c.message.message_id)
-        msg = bot.reply_to(c, 'How Many Passenger Capacity your Vehicle ? Enter Passenger Capacity ?')
-        bot.register_next_step_handler(msg, agency_date_step)
-
 def agency_destination_step(message):
     chat_id = message.chat.id
     agency_destination = message.text.capitalize()
@@ -203,11 +185,16 @@ def agency_passenger_step(message):
                 result_chat_id = messages.user_chat_id
                 seat = '\n Origin : ' + str(user.agency_origin) + '\n Destination : ' + str(user.agency_destination) + '\n Date : ' + str(user.agency_travel_dates) + ' \n This route vehicle is available right now, so call Agency this Mobile Number  ' + str(user.agency_number) + ' immediately !!! '
                 UserPrivetMessage().send_msg(seat, result_chat_id)
-        if results:
-            for messages in results:
-                result_chat_id = messages.distributor_chat_id
-                seat = (f"{user_count} user is available this route ")
-                AgencyPrivetMessage().send_msg(seat, result_chat_id)
+        subscription_complate = TokenManagement().token_expire(chat_id)
+        if subscription_complate:
+            bot.send_message(chat_id, ' Your Subscription  valid till ' + str(subscription_complate.start_date.date()) + ' To ' + str(subscription_complate.end_date.date()))
+            if results:
+                for messages in results:
+                    result_chat_id = messages.distributor_chat_id
+                    seat = (f"{user_count} user is available this route ")
+                    AgencyPrivetMessage().send_msg(seat, result_chat_id)
+        else:
+            bot.send_message(chat_id, ' your subscription is not please subscription and then show user data')
 
     except ValueError as e:
         logging.error(
@@ -384,7 +371,7 @@ def user_passenger_step(message):
 user_dict = {}
 
 @bot.message_handler(commands=['subscription'])
-def subscription(message):
+def agency_subscription_valid(message):
     chat_id = message.chat.id
     try:
         results = TokenManagement().token_expire(chat_id)
@@ -392,7 +379,7 @@ def subscription(message):
             bot.send_message(chat_id, ' Your Subscription  valid till ' + str(results.start_date.date()) + ' To ' + str(results.end_date.date()))
         else:
             msg = bot.reply_to(message, "Please Enter Admin Token")
-            bot.register_next_step_handler(msg, insert)
+            bot.register_next_step_handler(msg, agency_subscription_process)
     except ValueError as e:
         logging.error(
             dict(
@@ -402,11 +389,11 @@ def subscription(message):
             )
         )
         msg = bot.reply_to(message, e)
-        bot.register_next_step_handler(msg, subscription)
+        bot.register_next_step_handler(msg, agency_subscription_valid)
         return
 
 
-def insert(message):
+def agency_subscription_process(message):
     chat_id = message.chat.id
     token = message.text
     try:
@@ -427,7 +414,7 @@ def insert(message):
             )
         )
         msg = bot.reply_to(message, e)
-        bot.register_next_step_handler(msg, insert)
+        bot.register_next_step_handler(msg, agency_subscription_process)
         return
 
 
