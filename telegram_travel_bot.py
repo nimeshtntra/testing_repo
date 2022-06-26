@@ -4,12 +4,34 @@ from validation import TravelValidation
 from traveldata import UserInsertDb, DistributorFilterData, DistributorInsertDb, UserPrivetMessage, UserFilterData
 import logging
 from constants import *
+from telegram_bot_calendar import DetailedTelegramCalendar, LSTEP
 
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
 bot = telebot.TeleBot(TOKEN)
 user_dict = {}
 
 
+class Ca:
+    @bot.message_handler(commands=['calendar'])
+    def calendar(self, m):
+        calendar, step = DetailedTelegramCalendar().build()
+        bot.send_message(m.chat.id,
+                         f"Select {LSTEP[step]}",
+                         reply_markup=calendar)
+
+
+    @bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+    def cal(self, c):
+        result, key, step = DetailedTelegramCalendar().process(c.data)
+        if not result and key:
+            bot.edit_message_text(f"Select {LSTEP[step]}",
+                                  c.message.chat.id,
+                                  c.message.message_id,
+                                  reply_markup=key)
+        elif result:
+            bot.edit_message_text(f"You selected {result}",
+                                  c.message.chat.id,
+                                  c.message.message_id)
 def markup_inline():
     markup = InlineKeyboardMarkup()
     markup.width = 2
