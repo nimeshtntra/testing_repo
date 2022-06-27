@@ -6,7 +6,6 @@ import logging
 from constants import *
 
 
-
 logging.basicConfig(filename='.log', level=logging.DEBUG, format=LOG_FORMAT, style='{')
 bot = telebot.TeleBot(TOKEN)
 user_dict = {}
